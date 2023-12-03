@@ -23,7 +23,7 @@ func sumPartNumbers(schematic string) int {
 			ch := rune(line[x])
 
 			if unicode.IsDigit(ch) {
-				num, xx := parseFullNumberAndLastPosition(ch, x, line)
+				num, xx := parseFullNumberAndLastPosition(x, line)
 
 				// Check adjacent cells for symbols
 				isAdjacentToSymbol := false
@@ -53,8 +53,12 @@ func sumPartNumbers(schematic string) int {
 	return sum
 }
 
-func parseFullNumberAndLastPosition(ch rune, x int, line string) (int, int) {
-	numStr := string(ch)
+func parseFullNumberAndLastPosition(x int, line string) (int, int) {
+	for x > 0 && unicode.IsDigit(rune(line[x-1])) {
+		x -= 1
+	}
+
+	numStr := string(rune(line[x]))
 	// Scan for the full number
 	xx := x + 1
 	for xx < len(line) && unicode.IsDigit(rune(line[xx])) {
@@ -65,6 +69,50 @@ func parseFullNumberAndLastPosition(ch rune, x int, line string) (int, int) {
 	num, _ := strconv.Atoi(numStr)
 
 	return num, xx
+}
+
+func sumGearRatios(schematic string) int {
+	lines := strings.Split(schematic, "\n")
+	numberProcessed := make([][]bool, len(lines))
+	for i := range numberProcessed {
+		numberProcessed[i] = make([]bool, len(lines[0]))
+	}
+
+	dx := []int{-1, -1, -1, 0, 0, 1, 1, 1}
+	dy := []int{-1, 0, 1, -1, 1, -1, 0, 1}
+
+	totalGearRatio := 0
+
+	for y, line := range lines {
+		for x, ch := range line {
+			if ch == '*' {
+				partNumbers := make([]int, 0)
+
+				// Check adjacent cells for part numbers
+				for d := 0; d < 8; d++ {
+					ny := y + dy[d]
+					nx := x + dx[d]
+
+					if ny >= 0 && ny < len(lines) && nx >= 0 && nx < len(lines[ny]) && !numberProcessed[ny][nx] {
+						num, lastPos := parseFullNumberAndLastPosition(nx, lines[ny])
+						if num != 0 && lastPos > nx {
+							partNumbers = append(partNumbers, num)
+							// Mark the number as processed
+							for pos := nx; pos < lastPos; pos++ {
+								numberProcessed[ny][pos] = true
+							}
+						}
+					}
+				}
+
+				if len(partNumbers) == 2 {
+					totalGearRatio += partNumbers[0] * partNumbers[1]
+				}
+			}
+		}
+	}
+
+	return totalGearRatio
 }
 
 func main() {
@@ -89,6 +137,7 @@ func main() {
 		sum := sumPartNumbers(schematic)
 		fmt.Println("Sum of part numbers:", sum)
 	} else if task == 2 {
-		// TODO implement
+		sum := sumGearRatios(schematic)
+		fmt.Println("Sum of gear ratios:", sum)
 	}
 }
