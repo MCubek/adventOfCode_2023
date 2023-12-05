@@ -16,21 +16,16 @@ type RangeMapping struct {
 type RangeMap []RangeMapping
 
 func readAlmanac(input string) ([]int, []RangeMap) {
+	seeds := readSeeds1(input)
+	maps := readMaps(input)
+
+	return seeds, maps
+}
+func readMaps(input string) []RangeMap {
 	lines := strings.Split(strings.TrimSpace(input), "\n")
-	var seeds []int
 	var maps []RangeMap
-
-	// Process seeds
-	seedString := strings.Fields(lines[0])
-	for _, s := range seedString[1:] {
-		seed, err := strconv.Atoi(s)
-		if err != nil {
-			return nil, nil
-		}
-		seeds = append(seeds, seed)
-	}
-
 	var currentMap RangeMap
+
 	// Process maps
 	for _, line := range lines[1:] {
 		if line == "" {
@@ -52,7 +47,46 @@ func readAlmanac(input string) ([]int, []RangeMap) {
 	}
 	maps = append(maps, currentMap) // Don't forget to append the last map
 
-	return seeds, maps
+	return maps
+}
+
+func readSeeds1(input string) []int {
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	var seeds []int
+
+	// Process seeds
+	seedString := strings.Fields(lines[0])
+	for _, s := range seedString[1:] {
+		seed, err := strconv.Atoi(s)
+		if err != nil {
+			return nil
+		}
+		seeds = append(seeds, seed)
+	}
+	return seeds
+}
+
+func readSeeds2(input string) []int {
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	var seeds []int
+
+	// Process seeds
+	seedString := strings.Fields(lines[0])
+	for i := 1; i < len(seedString); i += 2 {
+		startingSeed, err := strconv.Atoi(seedString[i])
+		if err != nil {
+			return nil
+		}
+		seedRange, err := strconv.Atoi(seedString[i+1])
+		if err != nil {
+			return nil
+		}
+
+		for j := 0; j < seedRange; j++ {
+			seeds = append(seeds, startingSeed+j)
+		}
+	}
+	return seeds
 }
 
 func convertThroughMaps(value int, maps []RangeMap) int {
@@ -90,9 +124,17 @@ func main() {
 
 	almanac := string(fileContent)
 
-	seeds, maps := readAlmanac(almanac)
+	var lowestLocation int
+	if task == 1 {
+		seeds, maps := readAlmanac(almanac)
 
-	lowestLocation := findLowestLocation(seeds, maps)
+		lowestLocation = findLowestLocation(seeds, maps)
+	} else {
+		seeds := readSeeds2(almanac)
+		maps := readMaps(almanac)
+
+		lowestLocation = findLowestLocation(seeds, maps)
+	}
 
 	fmt.Println("Lowest location number:", lowestLocation)
 }

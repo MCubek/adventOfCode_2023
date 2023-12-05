@@ -48,3 +48,15 @@ func TestLowestLocation(t *testing.T) {
 		t.Errorf("Expected lowest location to be %d, got %d", expected, lowestLocation)
 	}
 }
+
+func TestLowestLocation2(t *testing.T) {
+	seeds := readSeeds2(input)
+	maps := readMaps(input)
+
+	lowestLocation := findLowestLocation(seeds, maps)
+
+	expected := 46
+	if lowestLocation != expected {
+		t.Errorf("Expected lowest location to be %d, got %d", expected, lowestLocation)
+	}
+}
