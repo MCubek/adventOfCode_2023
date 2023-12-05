@@ -7,12 +7,18 @@ import (
 	"strings"
 )
 
-type RangeMap map[int]int
+type RangeMapping struct {
+	StartSrc  int
+	StartDest int
+	Length    int
+}
+
+type RangeMap []RangeMapping
 
 func readAlmanac(input string) ([]int, []RangeMap) {
 	lines := strings.Split(strings.TrimSpace(input), "\n")
 	var seeds []int
-	maps := []RangeMap{{}}
+	var maps []RangeMap
 
 	// Process seeds
 	seedString := strings.Fields(lines[0])
@@ -24,10 +30,12 @@ func readAlmanac(input string) ([]int, []RangeMap) {
 		seeds = append(seeds, seed)
 	}
 
+	var currentMap RangeMap
 	// Process maps
 	for _, line := range lines[1:] {
 		if line == "" {
-			maps = append(maps, RangeMap{})
+			maps = append(maps, currentMap)
+			currentMap = RangeMap{}
 			continue
 		}
 
@@ -40,18 +48,25 @@ func readAlmanac(input string) ([]int, []RangeMap) {
 		startSrc, _ := strconv.Atoi(parts[1])
 		length, _ := strconv.Atoi(parts[2])
 
-		for i := 0; i < length; i++ {
-			maps[len(maps)-1][startSrc+i] = startDest + i
-		}
+		currentMap = append(currentMap, RangeMapping{StartSrc: startSrc, StartDest: startDest, Length: length})
 	}
+	maps = append(maps, currentMap) // Don't forget to append the last map
 
 	return seeds, maps
 }
 
 func convertThroughMaps(value int, maps []RangeMap) int {
 	for _, m := range maps {
-		if newVal, ok := m[value]; ok {
-			value = newVal
+		converted := false
+		for _, mapping := range m {
+			if value >= mapping.StartSrc && value < mapping.StartSrc+mapping.Length {
+				value = mapping.StartDest + (value - mapping.StartSrc)
+				converted = true
+				break
+			}
+		}
+		if !converted {
+			// If not converted, it remains the same
 		}
 	}
 	return value
