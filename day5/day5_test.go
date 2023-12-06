@@ -50,10 +50,9 @@ func TestLowestLocation(t *testing.T) {
 }
 
 func TestLowestLocation2(t *testing.T) {
-	seeds := readSeeds2(input)
 	maps := readMaps(input)
 
-	lowestLocation := findLowestLocation(seeds, maps)
+	lowestLocation := findLowestLocation2(input, maps)
 
 	expected := 46
 	if lowestLocation != expected {

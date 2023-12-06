@@ -66,29 +66,6 @@ func readSeeds1(input string) []int {
 	return seeds
 }
 
-func readSeeds2(input string) []int {
-	lines := strings.Split(strings.TrimSpace(input), "\n")
-	var seeds []int
-
-	// Process seeds
-	seedString := strings.Fields(lines[0])
-	for i := 1; i < len(seedString); i += 2 {
-		startingSeed, err := strconv.Atoi(seedString[i])
-		if err != nil {
-			return nil
-		}
-		seedRange, err := strconv.Atoi(seedString[i+1])
-		if err != nil {
-			return nil
-		}
-
-		for j := 0; j < seedRange; j++ {
-			seeds = append(seeds, startingSeed+j)
-		}
-	}
-	return seeds
-}
-
 func convertThroughMaps(value int, maps []RangeMap) int {
 	for _, m := range maps {
 		converted := false
@@ -130,10 +107,9 @@ func main() {
 
 		lowestLocation = findLowestLocation(seeds, maps)
 	} else {
-		seeds := readSeeds2(almanac)
 		maps := readMaps(almanac)
 
-		lowestLocation = findLowestLocation(seeds, maps)
+		lowestLocation = findLowestLocation2(almanac, maps)
 	}
 
 	fmt.Println("Lowest location number:", lowestLocation)
@@ -147,5 +123,34 @@ func findLowestLocation(seeds []int, maps []RangeMap) int {
 			lowestLocation = location
 		}
 	}
+	return lowestLocation
+}
+
+func findLowestLocation2(input string, maps []RangeMap) int {
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	seedString := strings.Fields(lines[0])
+	lowestLocation := -1
+
+	for i := 1; i < len(seedString); i += 2 {
+		startingSeed, err := strconv.Atoi(seedString[i])
+		if err != nil {
+			fmt.Println("Error converting starting seed:", err)
+			continue
+		}
+		seedRange, err := strconv.Atoi(seedString[i+1])
+		if err != nil {
+			fmt.Println("Error converting seed range:", err)
+			continue
+		}
+
+		for j := 0; j < seedRange; j++ {
+			seed := startingSeed + j
+			location := convertThroughMaps(seed, maps)
+			if lowestLocation == -1 || location < lowestLocation {
+				lowestLocation = location
+			}
+		}
+	}
+
 	return lowestLocation
 }
